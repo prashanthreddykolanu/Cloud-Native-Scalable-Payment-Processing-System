@@ -1,0 +1,57 @@
+/* PaymentApp.css */
+
+.payment-container {
+  text-align: center;
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+  color: #333;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.pay-button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.pay-button:hover {
+  background-color: #218838;
+}
+
+.message {
+  color: #007bff;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.transaction-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.transaction-list li {
+  background: #fff;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
