@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './PaymentApp.css';
+
+function PaymentApp() {
+  const [amount, setAmount] = useState('');
+  const [transactions, setTransactions] = useState([]);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get('/api/payments/transactions');
+      setTransactions(response.data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
+  };
+
+  const handlePayment = async () => {
+    try {
+      const response = await axios.post('/api/payments/process', { amount: parseFloat(amount) });
+      setMessage(response.data);
+      setAmount('');
+      fetchTransactions();
+    } catch (error) {
+      console.error('Error processing payment:', error);
+    }
+  };
+
+  return (
+    <div className="payment-container">
+      <h2>Cloud Payment Processing System</h2>
+      <input
+        type="number"
+        placeholder="Enter Amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        className="input-field"
+      />
+      <button className="pay-button" onClick={handlePayment}>Make Payment</button>
+      <p className="message">{message}</p>
+      <h3>Transaction History</h3>
+      <ul className="transaction-list">
+        {transactions.map((txn, index) => (
+          <li key={index}>{txn.transactionId} - ${txn.amount}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default PaymentApp;
