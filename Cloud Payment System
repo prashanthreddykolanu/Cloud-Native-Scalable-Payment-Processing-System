@@ -1,0 +1,115 @@
+package com.paymentgateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import javax.persistence.*;
+import java.util.*;
+
+@SpringBootApplication
+public class PaymentGatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentGatewayApplication.class, args);
+    }
+}
+
+@RestController
+@RequestMapping("/api/payments")
+class PaymentController {
+    @Autowired
+    private PaymentService paymentService;
+
+    @PostMapping("/process")
+    public String processPayment(@RequestBody PaymentRequest request) {
+        return paymentService.processPayment(request);
+    }
+
+    @GetMapping("/transactions")
+    public List<PaymentTransaction> getTransactions() {
+        return paymentService.getAllTransactions();
+    }
+}
+
+@Service
+class PaymentService {
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    public String processPayment(PaymentRequest request) {
+        PaymentTransaction transaction = new PaymentTransaction(UUID.randomUUID().toString(), request.getAmount());
+        paymentRepository.save(transaction);
+        return "Payment successful! Transaction ID: " + transaction.getTransactionId();
+    }
+
+    public List<PaymentTransaction> getAllTransactions() {
+        return paymentRepository.findAll();
+    }
+}
+
+@Entity
+class PaymentTransaction {
+    @Id
+    private String transactionId;
+    private double amount;
+
+    public PaymentTransaction() {}
+
+    public PaymentTransaction(String transactionId, double amount) {
+        this.transactionId = transactionId;
+        this.amount = amount;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+}
+
+interface PaymentRepository extends JpaRepository<PaymentTransaction, String> {}
+
+class PaymentRequest {
+    private double amount;
+    
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+}
+
+@EnableWebSecurity
+class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+            .antMatchers("/api/payments/process").authenticated()
+            .anyRequest().permitAll()
+            .and()
+            .oauth2Login();
+    }
+}
+
+@EnableResourceServer
+class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+            .antMatchers("/api/payments/process").authenticated()
+            .anyRequest().permitAll();
+    }
+}
